@@ -37,4 +37,5 @@ jobs:
     - name: Archive build
       uses: actions/upload-artifact@v2
       with:
+        name: win-${{env.build_type}}
         path: ${{github.workspace}}/build/${{env.build_type}}

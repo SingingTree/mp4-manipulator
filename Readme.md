@@ -8,7 +8,7 @@ This is currently a work in progress.
 
 ### Windows specific
 
-- If on Windows copy qt dlls with `/c/Qt/6.0.0/msvc2019_64/bin/windeployqt.exe build/Debug/mp4-manipulator.exe` or similar
+- If on Windows copy qt dlls with `/c/Qt/6.0.0/msvc2019_64/bin/windeployqt.exe build/Debug/`, replacing `Debug` with whatever kind of build you've performed.
 
 #### Building on Windows with clang
 
