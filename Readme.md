@@ -1,10 +1,14 @@
+This is currently a work in progress.
+
 ## Build notes
+
+- Prior to building make sure Qt is on your path or set `CMAKE_PREFIX_PATH` env vars to cmake can find your Qt install. E.g. `CMAKE_PREFIX_PATH=/c/Qt/6.0.0/msvc2019_64/`.
+- Generate build files with `cmake -B build`
+- Build with `cmake --build build/`
 
 ### Windows specific
 
-- Generate build files with `CMAKE_PREFIX_PATH=/c/Qt/6.0.0/msvc2019_64/ /c/Program\ Files/CMake/bin/cmake -B build`
-- Build with `CMAKE_PREFIX_PATH=/c/Qt/6.0.0/msvc2019_64/ /c/Program\ Files/CMake/bin/cmake --build build/`
-- If on Windows copy qt dlls with `/c/Qt/6.0.0/msvc2019_64/bin/windeployqt.exe build/Debug/helloworld.exe` or similar
+- If on Windows copy qt dlls with `/c/Qt/6.0.0/msvc2019_64/bin/windeployqt.exe build/Debug/mp4-manipulator.exe` or similar
 
 #### Building on Windows with clang
 
