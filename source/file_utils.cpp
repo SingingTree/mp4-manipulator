@@ -41,8 +41,9 @@ void RecursiveMatchAtoms(AtomOrDescriptorBase* atom, AP4_Atom* ap4_atom) {
          ap4_container_atom->GetChildren().ItemCount());
   for (size_t i = 0; i < atom->GetChildAtoms().size(); ++i) {
     AP4_Atom* ap4_child = nullptr;
-    assert(ap4_container_atom->GetChildren().Get(static_cast<AP4_Ordinal>(i),
-                                                 ap4_child) == AP4_SUCCESS);
+    [[maybe_unused]] AP4_Result result = ap4_container_atom->GetChildren().Get(
+        static_cast<AP4_Ordinal>(i), ap4_child);
+    assert(result == AP4_SUCCESS);
     RecursiveMatchAtoms(atom->GetChildAtoms().at(i).get(), ap4_child);
   }
 }

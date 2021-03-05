@@ -14,11 +14,11 @@ namespace mp4_manipulator {
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
-      atom_tree_model_(new AtomTreeModel(this)),
-      tree_view_(new QTreeView(this)),
-      open_file_action_(new QAction("&Open file", this)),
-      collapse_tree_action_(new QAction("&Collapse all", this)),
-      expand_tree_action_(new QAction("&Expand all", this)) {
+      atom_tree_model_{new AtomTreeModel{this}},
+      tree_view_{new QTreeView{this}},
+      open_file_action_{new QAction{"&Open file", this}},
+      collapse_tree_action_{new QAction{"&Collapse all", this}},
+      expand_tree_action_{new QAction{"&Expand all", this}} {
   SetupMenuBar();
   SetupTreeView();
 }
@@ -36,8 +36,9 @@ void MainWindow::SetAtoms(
 void MainWindow::SetupMenuBar() {
   file_menu_ = menuBar()->addMenu("&File");
   file_menu_->addAction(open_file_action_);
-  assert(connect(open_file_action_, &QAction::triggered, this,
-                 &MainWindow::OpenFile));
+  [[maybe_unused]] bool ok = connect(open_file_action_, &QAction::triggered,
+                                     this, &MainWindow::OpenFile);
+  assert(ok);
 }
 
 void MainWindow::SetupTreeView() {
@@ -50,13 +51,17 @@ void MainWindow::SetupTreeView() {
 
   // Setup the tree view menu.
   tree_view_->setContextMenuPolicy(Qt::CustomContextMenu);
-  assert(connect(tree_view_, &QTreeView::customContextMenuRequested, this,
-                 &MainWindow::ShowTreeMenu));
+  [[maybe_unused]] bool ok =
+      connect(tree_view_, &QTreeView::customContextMenuRequested, this,
+              &MainWindow::ShowTreeMenu);
+  assert(ok);
   setCentralWidget(tree_view_);
-  assert(connect(collapse_tree_action_, &QAction::triggered, tree_view_,
-                 &QTreeView::collapseAll));
-  assert(connect(expand_tree_action_, &QAction::triggered, tree_view_,
-                 &QTreeView::expandAll));
+  ok = connect(collapse_tree_action_, &QAction::triggered, tree_view_,
+               &QTreeView::collapseAll);
+  assert(ok);
+  ok = connect(expand_tree_action_, &QAction::triggered, tree_view_,
+               &QTreeView::expandAll);
+  assert(ok);
   // Done setting up tree view menu.
 }
 
@@ -117,8 +122,10 @@ void MainWindow::ShowTreeMenu(QPoint const& point) {
       // a direct connection, otherwise this isn't thread safe.
       assert(dump_action->thread() == this->thread());
 
-      assert(connect(dump_action, &QAction::triggered,
-                     [this, ap4_atom]() { DumpAtom(*ap4_atom); }));
+      [[maybe_unused]] bool ok =
+          connect(dump_action, &QAction::triggered,
+                  [this, ap4_atom]() { DumpAtom(*ap4_atom); });
+      assert(ok);
       menu.addAction(dump_action);
     }
   }
