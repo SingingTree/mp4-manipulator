@@ -1,0 +1,42 @@
+name: MacOS build
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '6.0.0'
+        dir: '${{github.workspace}}/qt/'
+
+    - name: Configure build
+      working-directory: ${{github.workspace}}
+      run: cmake -B ${{github.workspace}}/build -D CMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: macdeployqt
+      run: macdeployqt ${{github.workspace}}/build/mp4-manipulator.app
+
+    - name: Move app for archiving
+      working-directory: ${{github.workspace}}/build
+      run: mkdir mp4-manipulator && mv mp4-manipulator.app mp4-manipulator
+
+    - name: Archive build
+      uses: actions/upload-artifact@v2
+      with:
+        name: macos-${{env.BUILD_TYPE}}
+        path: ${{github.workspace}}/build/mp4-manipulator

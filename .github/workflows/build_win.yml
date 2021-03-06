@@ -1,4 +1,4 @@
-name: CMake
+name: Windows build
 
 on: [push]
 
@@ -32,10 +32,10 @@ jobs:
 
     # Copy Qt dlls into dir with bianries.
     - name: windeployqt
-      run: windeployqt.exe ${{github.workspace}}/build/${{env.build_type}}
+      run: windeployqt.exe ${{github.workspace}}/build/${{env.BUILD_TYPE}}
 
     - name: Archive build
       uses: actions/upload-artifact@v2
       with:
-        name: win-${{env.build_type}}
-        path: ${{github.workspace}}/build/${{env.build_type}}
+        name: win-${{env.BUILD_TYPE}}
+        path: ${{github.workspace}}/build/${{env.BUILD_TYPE}}
