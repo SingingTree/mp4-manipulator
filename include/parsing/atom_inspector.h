@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Ap4.h"
-#include "atom.h"
+#include "parsing/atom.h"
 
 namespace mp4_manipulator {
 

@@ -1,4 +1,4 @@
-#include "position_aware_atom_factory.h"
+#include "parsing/position_aware_atom_factory.h"
 
 namespace mp4_manipulator {
 AP4_Result PositionAwareAtomFactory::CreateAtomFromStream(

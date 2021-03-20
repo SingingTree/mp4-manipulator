@@ -1,10 +1,10 @@
-#include "file_utils.h"
+#include "parsing/file_utils.h"
 
 #include <iostream>
 
 #include "Ap4.h"
-#include "atom_inspector.h"
-#include "position_aware_atom_factory.h"
+#include "parsing/atom_inspector.h"
+#include "parsing/position_aware_atom_factory.h"
 
 namespace mp4_manipulator::utility {
 namespace {
@@ -176,3 +176,4 @@ void DumpAtom(char const* output_file_name, AP4_Atom& atom) {
   output->Release();
 }
 }  // namespace mp4_manipulator::utility
+

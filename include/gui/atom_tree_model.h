@@ -3,7 +3,7 @@
 
 #include <QAbstractItemModel>
 
-#include "atom.h"
+#include "parsing/atom.h"
 
 namespace mp4_manipulator {
 

@@ -3,8 +3,8 @@
 // Could try and move these later, but import order seems to matter for some
 // reason
 
-#include "file_utils.h"
-#include "main_window.h"
+#include "parsing/file_utils.h"
+#include "gui/main_window.h"
 
 int main(int argc, char* argv[]) {
   // TODO(bryce): save and load window dimensions. See

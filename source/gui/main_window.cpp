@@ -1,11 +1,11 @@
-#include "main_window.h"
+#include "gui/main_window.h"
 
 #include <QFileDialog>
 #include <QMenu>
 #include <QMenuBar>
 #include <QTreeView>
 
-#include "file_utils.h"
+#include "parsing/file_utils.h"
 
 namespace mp4_manipulator {
 

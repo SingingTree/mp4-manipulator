@@ -61,19 +61,19 @@ target_include_directories(ap4 PUBLIC ${AP4_INCLUDE_DIRS})
 # - It means the results of cmakes gen code will include the headers. E.g.
 #   Visual Studio projects will include the headers.
 set(MP4_MANIPULATOR_SOURCES
-  include/atom.h
-  include/atom_inspector.h
-  include/atom_tree_model.h
-  include/file_utils.h
-  include/main_window.h
-  include/position_aware_atom_factory.h
-  source/atom_inspector.cpp
-  source/atom_tree_model.cpp
-  source/atom.cpp
-  source/file_utils.cpp
-  source/main_window.cpp
-  source/main.cpp
-  source/position_aware_atom_factory.cpp)
+  include/gui/atom_tree_model.h
+  include/gui/main_window.h
+  include/parsing/atom_inspector.h
+  include/parsing/atom.h
+  include/parsing/file_utils.h
+  include/parsing/position_aware_atom_factory.h
+  source/gui/atom_tree_model.cpp
+  source/gui/main_window.cpp
+  source/parsing/atom_inspector.cpp
+  source/parsing/atom.cpp
+  source/parsing/file_utils.cpp
+  source/parsing/position_aware_atom_factory.cpp
+  source/main.cpp)
 if(WIN32)
   add_executable(mp4-manipulator WIN32 ${MP4_MANIPULATOR_SOURCES})
 elseif(APPLE)

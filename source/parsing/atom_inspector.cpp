@@ -1,4 +1,4 @@
-#include "atom_inspector.h"
+#include "parsing/atom_inspector.h"
 
 #include <QTextStream>
 

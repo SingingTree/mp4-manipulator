@@ -5,7 +5,7 @@
 #include <QMainWindow>
 
 #include "Ap4.h"
-#include "atom_tree_model.h"
+#include "gui/atom_tree_model.h"
 
 QT_FORWARD_DECLARE_CLASS(QTreeView)
 

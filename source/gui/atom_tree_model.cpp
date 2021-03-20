@@ -1,4 +1,4 @@
-#include "atom_tree_model.h"
+#include "gui/atom_tree_model.h"
 
 #include <algorithm>  // std::find
 
