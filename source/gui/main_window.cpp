@@ -116,8 +116,8 @@ void MainWindow::ShowTreeMenu(QPoint const& point) {
                              ? item->underlying_item->GetAp4Atom()
                              : nullptr;
 
-    QAction* dump_action = new QAction("&Dump atom", &menu);
     if (ap4_atom != nullptr) {
+      QAction* dump_action = new QAction("&Dump atom", &menu);
       // These need to be on the same thread so the connection below will use
       // a direct connection, otherwise this isn't thread safe.
       assert(dump_action->thread() == this->thread());
