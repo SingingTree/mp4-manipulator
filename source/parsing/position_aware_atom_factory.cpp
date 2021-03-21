@@ -42,7 +42,8 @@ AP4_Result PositionAwareAtomFactory::CreateAtomFromStream(
 
   // Insertions should always create a new element. I.e. we should not have
   // collisions as each atom is unique.
-  bool const inserted = atom_to_position_map_.insert({atom, atom_start_position}).second;
+  [[maybe_unused]] bool const inserted =
+      atom_to_position_map_.insert({atom, atom_start_position}).second;
   assert(inserted);
 
   return AP4_SUCCESS;

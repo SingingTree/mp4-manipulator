@@ -6,7 +6,7 @@ project(mp4-manipulator VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Start Qt config
+# Start Qt6 config
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -36,7 +36,7 @@ file(GLOB AP4_SOURCES
   ${BENTO4_SOURCE_SYSTEM}/StdC/*.cpp
 )
 
-# Platform specifics
+# Platform specific config for AP4.
 if(WIN32)
   set(AP4_SOURCES ${AP4_SOURCES} ${BENTO4_SOURCE_SYSTEM}/Win32/Ap4Win32Random.cpp)
 else()
@@ -54,6 +54,10 @@ set(AP4_INCLUDE_DIRS
 add_library(ap4 STATIC ${AP4_SOURCES})
 target_include_directories(ap4 PUBLIC ${AP4_INCLUDE_DIRS})
 # End bento4 config
+
+# Export compile commands on platforms that support it. This is low cost and
+# means we can then use tools like `clang-tidy` where available.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # We include headers here for a couple of reasons
 # - Automoc won't work properly if we don't (since the headers are in their own 
@@ -88,4 +92,4 @@ target_link_libraries(mp4-manipulator PRIVATE ap4)
 
 target_link_libraries(mp4-manipulator PRIVATE Qt6::Widgets)
 
-# Create imported target for windeployqt
+# TODO Create imported target for windeployqt

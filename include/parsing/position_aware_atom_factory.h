@@ -1,6 +1,7 @@
 #ifndef MP4_MANIPULATOR_POSITION_AWARE_ATOM_FACTORY_
 #define MP4_MANIPULATOR_POSITION_AWARE_ATOM_FACTORY_
 
+#include <cstdint>
 #include <unordered_map>
 
 #include "Ap4.h"

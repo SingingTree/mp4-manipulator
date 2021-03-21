@@ -18,19 +18,19 @@ QVariant AtomTreeModel::data(QModelIndex const& index, int role) const {
 
   ModelItem* item = static_cast<ModelItem*>(index.internalPointer());
   switch (index.column()) {
-    case 0: // Name
+    case 0:  // Name
       return item->name;
-    case 1: // Value
+    case 1:  // Value
       if (item->value.has_value()) {
         return item->value.value();
       }
       return QVariant{};
-    case 2: // Position
+    case 2:  // Position
       if (item->position.has_value()) {
         return item->position.value();
       }
       return QVariant{};
-    case 3: // Size
+    case 3:  // Size
       if (item->type == ModelItem::Type::kAtom) {
         // Report size for atoms.
         QString size_string;

@@ -1,0 +1,55 @@
+name: Linux lint
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '6.0.0'
+        dir: '${{github.workspace}}/qt/'
+
+    - name: Configure build
+      working-directory: ${{github.workspace}}
+      run: cmake -B ${{github.workspace}}/build -D CMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    # Do a build so have a compile database for clang-tidy.
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Setup llvm repo
+      run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add - && sudo apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main"
+
+    - name: Install clang-format-12
+      run: sudo apt-get install -y clang-format-12
+
+    - name: clang-format
+      id: clang-format
+      working-directory: ${{github.workspace}}
+      continue-on-error: true
+      run: find include source -iname *.h -o -iname *.cpp | xargs clang-format-12 --style=file --dry-run -Werror
+
+    - name: Install clang-tidy
+      run: sudo apt-get install -y clang-tidy
+
+    - name: clang-tidy
+      id: clang-tidy
+      working-directory: ${{github.workspace}}
+      continue-on-error: true
+      run: find include source -iname *.h -o -iname *.cpp | xargs clang-tidy -p build/compile_commands.json
+
+    - name: lint-status
+      if: steps.clang-format.outcome != 'success' || steps.clang-tidy.outcome != 'success'
+      run: exit 1

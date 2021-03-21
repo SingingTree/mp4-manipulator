@@ -1,11 +1,10 @@
 #ifndef MP4_MANIPULATOR_ATOM_H_
 #define MP4_MANIPULATOR_ATOM_H_
 
-#include <optional>
-
 #include <QString>
 #include <QVector>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "Ap4.h"

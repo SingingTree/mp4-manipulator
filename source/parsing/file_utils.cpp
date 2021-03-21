@@ -10,6 +10,11 @@ namespace mp4_manipulator::utility {
 namespace {
 // The recursive guts of the `MatchAtoms` function.
 void RecursiveMatchAtoms(AtomOrDescriptorBase* atom, AP4_Atom* ap4_atom) {
+  if (ap4_atom == nullptr) {
+    // Callers should ensure this doesn't happen.
+    assert(false);
+    return;
+  }
   atom->SetAp4Atom(ap4_atom);
   // Ensure type matching invariant holds.
   assert(atom->GetName().toStdString().length() == 4);
@@ -153,7 +158,7 @@ std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name) {
 
   std::unordered_map<AP4_Atom*, uint64_t> atom_to_position_map =
       atom_factory.TakeAtomToPositionMap();
-  
+
   SetAtomPositions(holder, atom_to_position_map);
 
   return holder;
@@ -176,4 +181,3 @@ void DumpAtom(char const* output_file_name, AP4_Atom& atom) {
   output->Release();
 }
 }  // namespace mp4_manipulator::utility
-

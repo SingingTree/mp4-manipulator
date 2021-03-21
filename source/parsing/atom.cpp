@@ -14,12 +14,13 @@ uint32_t AtomOrDescriptorBase::GetHeaderSize() const { return header_size_; }
 
 uint64_t AtomOrDescriptorBase::GetSize() const { return size_; }
 
-std::optional<uint64_t> AtomOrDescriptorBase::GetPositionInFile() const { return position_in_file_; }
+std::optional<uint64_t> AtomOrDescriptorBase::GetPositionInFile() const {
+  return position_in_file_;
+}
 
 void AtomOrDescriptorBase::SetPositionInFile(uint64_t position_in_file) {
   position_in_file_ = position_in_file;
 }
-
 
 std::vector<Field> const& AtomOrDescriptorBase::GetFields() const {
   return fields_;
