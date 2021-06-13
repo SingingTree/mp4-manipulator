@@ -1,8 +1,11 @@
 #include "gui/main_window.h"
 
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QMenu>
 #include <QMenuBar>
+#include <QMimeData>
 #include <QTreeView>
 
 #include "parsing/file_utils.h"
@@ -21,6 +24,7 @@ MainWindow::MainWindow(QWidget* parent)
       expand_tree_action_{new QAction{"&Expand all", this}} {
   SetupMenuBar();
   SetupTreeView();
+  setAcceptDrops(true);  // Accept drag and drop to open files.
 }
 
 void MainWindow::SetAtoms(
@@ -37,7 +41,7 @@ void MainWindow::SetupMenuBar() {
   file_menu_ = menuBar()->addMenu("&File");
   file_menu_->addAction(open_file_action_);
   [[maybe_unused]] bool ok = connect(open_file_action_, &QAction::triggered,
-                                     this, &MainWindow::OpenFile);
+                                     this, &MainWindow::OpenFileUsingDialog);
   assert(ok);
 }
 
@@ -65,8 +69,7 @@ void MainWindow::SetupTreeView() {
   // Done setting up tree view menu.
 }
 
-void MainWindow::OpenFile() {
-  QString const file_name = QFileDialog::getOpenFileName(this);
+void MainWindow::OpenFile(QString const& file_name) {
   QByteArray file_name_bytes = file_name.toLocal8Bit();
   char const* c_str_file_name = file_name_bytes.data();
 
@@ -87,6 +90,11 @@ void MainWindow::OpenFile() {
   tree_view_->resizeColumnToContents(2);
   tree_view_->resizeColumnToContents(3);
   tree_view_->resizeColumnToContents(4);
+}
+
+void MainWindow::OpenFileUsingDialog() {
+  QString const file_name = QFileDialog::getOpenFileName(this);
+  OpenFile(file_name);
 }
 
 void MainWindow::ShowTreeMenu(QPoint const& point) {
@@ -140,5 +148,23 @@ void MainWindow::DumpAtom(AP4_Atom& atom) {
 
   utility::DumpAtom(c_str_file_name, atom);
 }
+
+// Begin drag and drop handling.
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event) {
+  if (event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+
+void MainWindow::dropEvent(QDropEvent* event) {
+  QList<QUrl> url_list = event->mimeData()->urls();
+  for (const QUrl& url : url_list) {
+    QString const file_name = url.toLocalFile();
+    OpenFile(file_name);
+  }
+}
+
+// End drag and drop handling.
 
 }  // namespace mp4_manipulator

@@ -20,10 +20,16 @@ class MainWindow : public QMainWindow {
                     top_level_inspected_atoms,
                 std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms);
 
+ protected:
+  void dragEnterEvent(QDragEnterEvent* event) override;
+  void dropEvent(QDropEvent* event) override;
+
  private:
   // Helpers for setting up specific UI elements.
   void SetupMenuBar();
   void SetupTreeView();
+
+  void OpenFile(QString const& file_name);
 
   QMenu* file_menu_;
 
@@ -45,7 +51,7 @@ class MainWindow : public QMainWindow {
 
  private slots:
   // Open a file in the UI.
-  void OpenFile();
+  void OpenFileUsingDialog();
 
   // Show a menu when right clicking on the tree model. This menu exposes
   // functionality to manipulate the tree and its contents.
