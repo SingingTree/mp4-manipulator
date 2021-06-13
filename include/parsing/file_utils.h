@@ -15,8 +15,12 @@ struct ParsedAtomHolder {
   std::vector<std::unique_ptr<AP4_Atom>> top_level_ap4_atoms;
 };
 
+// Reads atoms from a file. Returns a holder which contains vectors of the
+// parsed atoms as AtomOrDescriptorBase and AP4_Atoms (these are different
+// representations of the same underlying data).
 std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name);
 
+// Dumps an atom to a file.
 void DumpAtom(char const* output_file_name, AP4_Atom& atom);
 
 }  // namespace utility

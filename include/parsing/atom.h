@@ -19,7 +19,11 @@ struct Field {
 
 // A base class representing the shared aspects of atoms and descriptors.
 // ISO specs don't discuss these in terms of being similar, but from a UI
-// perspective they're both essentially the same (atoms have flag)
+// perspective they're both similar.
+// See ISO 14496-1's Object Description Framework section for an outline
+// of descriptors. See ISO 14496-12's Object-structured File Organization
+// section for an outline of atoms (boxes). ISO 14496-14 also contains details
+// of descriptors in the context of the mp4 format.
 class AtomOrDescriptorBase {
  public:
   enum class Type {
@@ -37,6 +41,8 @@ class AtomOrDescriptorBase {
 
   uint64_t GetSize() const;
 
+  // Returns, if known, the byte offset of the atom or descriptor from the start
+  // of the file.
   std::optional<uint64_t> GetPositionInFile() const;
   void SetPositionInFile(uint64_t position_in_file);
 
@@ -54,6 +60,8 @@ class AtomOrDescriptorBase {
   GetChildDescriptors() const;
   void AddChildDescriptor(std::unique_ptr<AtomOrDescriptorBase>&& child);
 
+  // Return the equivalent AP4_Atom, this may be null if the associated
+  // AP4_Atom is not set for whatever reason.
   AP4_Atom* GetAp4Atom() const;
   void SetAp4Atom(AP4_Atom* ap4_atom);
 
@@ -64,7 +72,7 @@ class AtomOrDescriptorBase {
   uint32_t header_size_;
   // Total size of the atom (including header).
   uint64_t size_;
-  // The offset of the atom or descriptor from the start of the file.
+  // The byte offset of the atom or descriptor from the start of the file.
   std::optional<uint64_t> position_in_file_{std::nullopt};
   std::vector<Field> fields_{};
   AtomOrDescriptorBase* parent_{nullptr};
