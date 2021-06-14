@@ -101,15 +101,14 @@ QModelIndex AtomTreeModel::parent(QModelIndex const& index) const {
   ModelItem* parent = child->parent;
 
   if (parent == model_root_.get()) {
-    // We're one level below the root.
+    // We're one level below the dummy root, i.e. this is a top level item,
+    // and doesn't have a parent.
     return QModelIndex();
   }
 
-  // if(parent->parent == nullptr) {
-  //
-  //  assert(parent == model_root_.get());
-  //  return createIndex(0, 0, parent);
-  //}
+  // Our parent should always have a parent, as the top level case has been
+  // handled above.
+  assert(parent->parent != nullptr);
 
   // Get the vector containing our parent and it's siblings.
   std::vector<std::unique_ptr<ModelItem>> const& parent_and_siblings =
@@ -141,13 +140,15 @@ int AtomTreeModel::rowCount(
     return 0;
   }
 
-  if (parent.column() > 0) {
-    return 0;
-  }
-
   if (!parent.isValid()) {
+    // If we have no parent we should be at the root.
     return model_root_->children.size();
   }
+
+  // All parents should indexes should be in the first column. If this assert
+  // fails then the model has changed and this logic needs updating.
+  assert(parent.column() == 0);
+
   ModelItem* parent_item = static_cast<ModelItem*>(parent.internalPointer());
   return parent_item->children.size();
 }
@@ -165,14 +166,16 @@ int AtomTreeModel::columnCount(
 
 void AtomTreeModel::SetAtoms(
     std::vector<std::unique_ptr<AtomOrDescriptorBase>>&& top_level_atoms) {
-  // The model is about to change layout from atoms being set, notify this.
-  layoutAboutToBeChanged();
+  // Since we're setting new atoms, notify a model reset -- we should
+  // invalidate the old model.
+  beginResetModel();
 
   top_level_atoms_ = std::move(top_level_atoms);
   UpdateModelItems();
 
-  // Notify that the layout has changed as a result of the atoms being set.
-  layoutChanged();
+  // Notify that the reset has been completed, it's now safe to query the new
+  // model data.
+  endResetModel();
 }
 
 void AtomTreeModel::UpdateModelItems() {
