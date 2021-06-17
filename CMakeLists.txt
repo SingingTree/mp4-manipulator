@@ -66,12 +66,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #   Visual Studio projects will include the headers.
 set(MP4_MANIPULATOR_SOURCES
   include/gui/atom_tree_model.h
+  include/gui/atom_tree_view.h
   include/gui/main_window.h
   include/parsing/atom_inspector.h
   include/parsing/atom.h
   include/parsing/file_utils.h
   include/parsing/position_aware_atom_factory.h
   source/gui/atom_tree_model.cpp
+  source/gui/atom_tree_view.cpp
   source/gui/main_window.cpp
   source/parsing/atom_inspector.cpp
   source/parsing/atom.cpp

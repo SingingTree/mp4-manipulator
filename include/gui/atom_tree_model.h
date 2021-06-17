@@ -32,8 +32,6 @@ struct ModelItem {
 };
 
 class AtomTreeModel : public QAbstractItemModel {
-  // Q_OBJECT
-
  public:
   explicit AtomTreeModel(QObject* parent = nullptr);
   ~AtomTreeModel() override = default;

@@ -16,48 +16,35 @@ class MainWindow : public QMainWindow {
  public:
   explicit MainWindow(QWidget* parent = nullptr);
 
-  void SetAtoms(std::vector<std::unique_ptr<AtomOrDescriptorBase>>&&
-                    top_level_inspected_atoms,
-                std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms);
-
  protected:
   void dragEnterEvent(QDragEnterEvent* event) override;
   void dropEvent(QDropEvent* event) override;
 
  private:
+  void RemoveTab(int tab_index);
   // Helpers for setting up specific UI elements.
   void SetupMenuBar();
-  void SetupTreeView();
+  void SetupTabbedWidget();
+
+  void SetupNewTab(
+      QString const& file_name,
+      std::vector<std::unique_ptr<AtomOrDescriptorBase>>&&
+          top_level_inspected_atoms,
+      std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms);
 
   void OpenFile(QString const& file_name);
 
   QMenu* file_menu_;
 
-  // TODO(bryce): refactor these members so that we can have multiple -- allow
-  // for tabbed view.
-  std::vector<std::unique_ptr<AP4_Atom>> top_level_ap4_atoms_;
-  AtomTreeModel* atom_tree_model_;
-  QTreeView* tree_view_;
+  QTabWidget* tabbed_widget_;
 
   // Begin QActions for menu bar.
   QAction* open_file_action_;
   // End QActions for menu bar.
 
-  // Begin QActions for `tree_view_` context menu.
-  // Actions to expand and collapse all items in our tree view.
-  QAction* collapse_tree_action_;
-  QAction* expand_tree_action_;
-  // End QActions for `tree_view_` context menu.
-
  private slots:
   // Open a file in the UI.
   void OpenFileUsingDialog();
-
-  // Show a menu when right clicking on the tree model. This menu exposes
-  // functionality to manipulate the tree and its contents.
-  void ShowTreeMenu(QPoint const& point);
-
-  void DumpAtom(AP4_Atom& atom);
 };
 
 }  // namespace mp4_manipulator
