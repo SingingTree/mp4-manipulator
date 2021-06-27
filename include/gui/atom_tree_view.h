@@ -8,6 +8,7 @@
 
 namespace mp4_manipulator {
 // A QTreeView that also encapsulates the atom data displayed in the tree.
+// This widget is what shows the contents of each tab in the UI.
 class AtomTreeView : public QTreeView {
   Q_OBJECT
  public:

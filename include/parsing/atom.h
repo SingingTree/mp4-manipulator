@@ -33,36 +33,36 @@ class AtomOrDescriptorBase {
   AtomOrDescriptorBase(char const* name, uint32_t header_size, uint64_t size);
   virtual ~AtomOrDescriptorBase();
 
-  virtual AtomOrDescriptorBase::Type GetType() const = 0;
+  [[nodiscard]] virtual AtomOrDescriptorBase::Type GetType() const = 0;
 
-  QString const& GetName() const;
+  [[nodiscard]] QString const& GetName() const;
 
-  uint32_t GetHeaderSize() const;
+  [[nodiscard]] uint32_t GetHeaderSize() const;
 
-  uint64_t GetSize() const;
+  [[nodiscard]] uint64_t GetSize() const;
 
   // Returns, if known, the byte offset of the atom or descriptor from the start
   // of the file.
-  std::optional<uint64_t> GetPositionInFile() const;
+  [[nodiscard]] std::optional<uint64_t> GetPositionInFile() const;
   void SetPositionInFile(uint64_t position_in_file);
 
-  std::vector<Field> const& GetFields() const;
+  [[nodiscard]] std::vector<Field> const& GetFields() const;
   void AddField(QString&& name, QString&& data);
 
-  AtomOrDescriptorBase* GetParent() const;
+  [[nodiscard]] AtomOrDescriptorBase* GetParent() const;
   void SetParent(AtomOrDescriptorBase* parent);
 
-  std::vector<std::unique_ptr<AtomOrDescriptorBase>> const& GetChildAtoms()
-      const;
+  [[nodiscard]] std::vector<std::unique_ptr<AtomOrDescriptorBase>> const&
+  GetChildAtoms() const;
   void AddChildAtom(std::unique_ptr<AtomOrDescriptorBase>&& child);
 
-  std::vector<std::unique_ptr<AtomOrDescriptorBase>> const&
+  [[nodiscard]] std::vector<std::unique_ptr<AtomOrDescriptorBase>> const&
   GetChildDescriptors() const;
   void AddChildDescriptor(std::unique_ptr<AtomOrDescriptorBase>&& child);
 
   // Return the equivalent AP4_Atom, this may be null if the associated
   // AP4_Atom is not set for whatever reason.
-  AP4_Atom* GetAp4Atom() const;
+  [[nodiscard]] AP4_Atom* GetAp4Atom() const;
   void SetAp4Atom(AP4_Atom* ap4_atom);
 
  private:
@@ -88,14 +88,14 @@ class Atom : public AtomOrDescriptorBase {
  public:
   Atom(char const* name, uint32_t header_size, uint64_t size);
 
-  AtomOrDescriptorBase::Type GetType() const override;
+  [[nodiscard]] AtomOrDescriptorBase::Type GetType() const override;
 };
 
 class Descriptor : public AtomOrDescriptorBase {
  public:
   Descriptor(char const* name, uint32_t header_size, uint64_t size);
 
-  AtomOrDescriptorBase::Type GetType() const override;
+  [[nodiscard]] AtomOrDescriptorBase::Type GetType() const override;
 };
 
 }  // namespace mp4_manipulator

@@ -37,15 +37,18 @@ class AtomTreeModel : public QAbstractItemModel {
   ~AtomTreeModel() override = default;
 
   // QAbstractItemModel overrides.
-  QVariant data(QModelIndex const& index, int role) const override;
-  Qt::ItemFlags flags(QModelIndex const& index) const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
+  [[nodiscard]] QVariant data(QModelIndex const& index, int role) const override;
+  [[nodiscard]] Qt::ItemFlags flags(QModelIndex const& index) const override;
+  [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation,
                       int role = Qt::DisplayRole) const override;
-  QModelIndex index(int row, int column,
-                    QModelIndex const& parent = QModelIndex()) const override;
-  QModelIndex parent(QModelIndex const& index) const override;
-  int rowCount(QModelIndex const& parent = QModelIndex()) const override;
-  int columnCount(QModelIndex const& parent = QModelIndex()) const override;
+  [[nodiscard]] QModelIndex index(
+      int row, int column,
+      QModelIndex const& parent = QModelIndex()) const override;
+  [[nodiscard]] QModelIndex parent(QModelIndex const& index) const override;
+  [[nodiscard]] int rowCount(
+      QModelIndex const& parent = QModelIndex()) const override;
+  [[nodiscard]] int columnCount(
+      QModelIndex const& parent = QModelIndex()) const override;
   // End QAbstractItemModel overrides.
 
   void SetAtoms(
