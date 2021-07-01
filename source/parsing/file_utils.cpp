@@ -80,7 +80,7 @@ void RecursiveSetAtomPositions(
   }
 
   uint64_t position = atom_to_position_map.at(ap4_atom);
-  atom->SetPositionInFile(position);
+  atom->SetPositionInStream(position);
 
   for (auto& child_atom : atom->GetChildAtoms()) {
     RecursiveSetAtomPositions(child_atom.get(), atom_to_position_map);

@@ -197,7 +197,7 @@ void AtomTreeModel::UpdateModelItems() {
     current_item->name = atom_or_descriptor->GetName();
     current_item->header_size = atom_or_descriptor->GetHeaderSize();
     current_item->size = atom_or_descriptor->GetSize();
-    current_item->position = atom_or_descriptor->GetPositionInFile();
+    current_item->position = atom_or_descriptor->GetPositionInStream();
     current_item->parent = parent;
     // Add the fields.
     for (Field const& field : atom_or_descriptor->GetFields()) {

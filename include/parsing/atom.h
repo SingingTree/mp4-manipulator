@@ -43,8 +43,8 @@ class AtomOrDescriptorBase {
 
   // Returns, if known, the byte offset of the atom or descriptor from the start
   // of the file.
-  [[nodiscard]] std::optional<uint64_t> GetPositionInFile() const;
-  void SetPositionInFile(uint64_t position_in_file);
+  [[nodiscard]] std::optional<uint64_t> GetPositionInStream() const;
+  void SetPositionInStream(uint64_t position_in_file);
 
   [[nodiscard]] std::vector<Field> const& GetFields() const;
   void AddField(QString&& name, QString&& data);
@@ -72,8 +72,8 @@ class AtomOrDescriptorBase {
   uint32_t header_size_;
   // Total size of the atom (including header).
   uint64_t size_;
-  // The byte offset of the atom or descriptor from the start of the file.
-  std::optional<uint64_t> position_in_file_{std::nullopt};
+  // The byte offset of the atom or descriptor from the start of the stream.
+  std::optional<uint64_t> position_in_stream_{std::nullopt};
   std::vector<Field> fields_{};
   AtomOrDescriptorBase* parent_{nullptr};
   std::vector<std::unique_ptr<AtomOrDescriptorBase>> child_atoms_{};
