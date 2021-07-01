@@ -99,32 +99,8 @@ void SetAtomPositions(
 }
 }  // namespace
 
-std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name) {
-  AP4_ByteStream* input = NULL;
-  AP4_Result result = AP4_FileByteStream::Create(
-      file_name, AP4_FileByteStream::STREAM_MODE_READ, input);
-  if (AP4_FAILED(result)) {
-    fprintf(stderr, "ERROR: cannot open input file %s (%d)\n", file_name,
-            result);
-    return std::nullopt;
-  }
-
-  // Don't bother with files, you don't get in order atoms on insepct
-  // AP4_File* file = new AP4_File(*input, false);
-  // file->Inspect(*inspector);
-
-  AP4_ByteStream* output = NULL;
-  AP4_FileByteStream::Create("-stdout", AP4_FileByteStream::STREAM_MODE_WRITE,
-                             output);
-
-  // create an inspector
+std::optional<ParsedAtomHolder> ReadAtoms(AP4_ByteStream* input) {
   std::unique_ptr<AtomInspector> inspector = std::make_unique<AtomInspector>();
-  // inspector = new AP4_PrintInspector(*output);
-
-  // Don't bother with files, you don't get in order atoms on insepct
-  // AP4_File* file = new AP4_File(*input, false);
-  // file->Inspect(*inspector);
-
   // Grab top level atoms, store and inspect them.
   AP4_Atom* atom;
   PositionAwareAtomFactory atom_factory;
@@ -133,8 +109,10 @@ std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name) {
       static_cast<AP4_AtomFactory*>(&atom_factory);
   std::vector<std::unique_ptr<AP4_Atom>> top_level_ap4_atoms;
   while (atom_factory_ptr->CreateAtomFromStream(*input, atom) == AP4_SUCCESS) {
-    // It's not clear the position reset code from mp4 dump is needed, so
-    // don't bother unless we run into issues.
+    // This AP4_Position code if from the mp4 dump source. There it's suggested
+    // that inspect could change the stream position so that this is needed.
+    // It's not clear that it is... The code is kept in case uncommenting it
+    // ever proves useful for fixing bad parses.
     // AP4_Position position;
     // input->Tell(position);
 
@@ -145,9 +123,6 @@ std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name) {
     // input->Seek(position);
 
     top_level_ap4_atoms.emplace_back(std::unique_ptr<AP4_Atom>(atom));
-  }
-  if (output) {
-    output->Release();
   }
 
   ParsedAtomHolder holder{};
@@ -162,6 +137,26 @@ std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name) {
   SetAtomPositions(holder, atom_to_position_map);
 
   return holder;
+}
+
+std::optional<ParsedAtomHolder> ReadAtoms(char const* file_name) {
+  // We don't bother using a file approach, because the atoms are not in the
+  // same order as if the boxes are streamed. An example of how to use AP4's
+  // file API is shown below, but again, we don't want to do this.
+  // AP4_File* file = new AP4_File(*input, false);
+  // file->Inspect(*inspector);
+
+  AP4_ByteStream* input = NULL;
+  AP4_Result result = AP4_FileByteStream::Create(
+      file_name, AP4_FileByteStream::STREAM_MODE_READ, input);
+  if (AP4_FAILED(result)) {
+    // TODO(bryce): Tie this into some global error handler.
+    fprintf(stderr, "ERROR: cannot open input file %s (%d)\n", file_name,
+            result);
+    return std::nullopt;
+  }
+
+  return ReadAtoms(input);
 }
 
 void DumpAtom(char const* output_file_name, AP4_Atom& atom) {
