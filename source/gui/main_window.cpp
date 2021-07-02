@@ -50,13 +50,9 @@ void MainWindow::SetupTabbedWidget() {
   assert(ok);
 }
 
-void MainWindow::SetupNewTab(
-    QString const& file_name,
-    std::vector<std::unique_ptr<AtomOrDescriptorBase>>&&
-        top_level_inspected_atoms,
-    std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms) {
-  AtomTreeView* atom_tree_view = new AtomTreeView(
-      std::move(top_level_inspected_atoms), std::move(top_level_ap4_atoms));
+void MainWindow::SetupNewTab(QString const& file_name,
+                             std::unique_ptr<AtomHolder>&& atom_holder) {
+  AtomTreeView* atom_tree_view = new AtomTreeView(std::move(atom_holder));
 
   tabbed_widget_->addTab(atom_tree_view, file_name);
 }
@@ -65,17 +61,15 @@ void MainWindow::OpenFile(QString const& file_name) {
   QByteArray file_name_bytes = file_name.toLocal8Bit();
   char const* c_str_file_name = file_name_bytes.data();
 
-  std::optional<utility::ParsedAtomHolder> possible_atoms =
+  std::optional<std::unique_ptr<AtomHolder>> possible_atoms =
       mp4_manipulator::utility::ReadAtoms(c_str_file_name);
   if (!possible_atoms.has_value()) {
     // TODO(bryce): warn on error.
     return;
   }
-  mp4_manipulator::utility::ParsedAtomHolder holder{
-      std::move(possible_atoms.value())};
+  std::unique_ptr<AtomHolder> holder{std::move(possible_atoms.value())};
 
-  SetupNewTab(file_name, std::move(holder.top_level_inspected_atoms),
-              std::move(holder.top_level_ap4_atoms));
+  SetupNewTab(file_name, std::move(holder));
 }
 
 void MainWindow::OpenFileUsingDialog() {

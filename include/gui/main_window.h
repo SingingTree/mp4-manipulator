@@ -26,11 +26,8 @@ class MainWindow : public QMainWindow {
   void SetupMenuBar();
   void SetupTabbedWidget();
 
-  void SetupNewTab(
-      QString const& file_name,
-      std::vector<std::unique_ptr<AtomOrDescriptorBase>>&&
-          top_level_inspected_atoms,
-      std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms);
+  void SetupNewTab(QString const& file_name,
+                   std::unique_ptr<AtomHolder>&& atom_holder);
 
   void OpenFile(QString const& file_name);
 

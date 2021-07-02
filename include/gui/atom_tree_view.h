@@ -12,15 +12,9 @@ namespace mp4_manipulator {
 class AtomTreeView : public QTreeView {
   Q_OBJECT
  public:
-  AtomTreeView(std::vector<std::unique_ptr<AtomOrDescriptorBase>>&&
-                   top_level_inspected_atoms,
-               std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms);
+  AtomTreeView(std::unique_ptr<AtomHolder>&& atom_holder);
 
  private:
-  // AP4 atoms that the AtomTreeModel will store references to. These are used
-  // if we wish to do things like dumping atoms via AP4.
-  std::vector<std::unique_ptr<AP4_Atom>> top_level_ap4_atoms_;
-
   AtomTreeModel* atom_tree_model_;
 
   // Begin context menu actions.

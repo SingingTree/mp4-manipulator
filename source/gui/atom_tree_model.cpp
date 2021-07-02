@@ -164,13 +164,12 @@ int AtomTreeModel::columnCount(
   return 4;
 }
 
-void AtomTreeModel::SetAtoms(
-    std::vector<std::unique_ptr<AtomOrDescriptorBase>>&& top_level_atoms) {
+void AtomTreeModel::SetAtoms(std::unique_ptr<AtomHolder>&& atom_holder) {
   // Since we're setting new atoms, notify a model reset -- we should
   // invalidate the old model.
   beginResetModel();
 
-  top_level_atoms_ = std::move(top_level_atoms);
+  atom_holder_ = std::move(atom_holder);
   UpdateModelItems();
 
   // Notify that the reset has been completed, it's now safe to query the new
@@ -225,9 +224,11 @@ void AtomTreeModel::UpdateModelItems() {
     parent->children.push_back(std::move(current_item));
   };
 
+  std::vector<std::unique_ptr<AtomOrDescriptorBase>>& top_level_atoms =
+      atom_holder_->GetTopLevelAtoms();
   model_root_ = std::make_unique<ModelItem>();
-  for (size_t i = 0; i < top_level_atoms_.size(); ++i) {
-    add_atom_or_descriptor(model_root_.get(), top_level_atoms_.at(i).get());
+  for (size_t i = 0; i < top_level_atoms.size(); ++i) {
+    add_atom_or_descriptor(model_root_.get(), top_level_atoms.at(i).get());
   }
 }
 
