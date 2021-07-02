@@ -4,6 +4,7 @@
 #include <QAbstractItemModel>
 
 #include "parsing/atom.h"
+#include "parsing/atom_holder.h"
 
 namespace mp4_manipulator {
 
@@ -37,26 +38,28 @@ class AtomTreeModel : public QAbstractItemModel {
   ~AtomTreeModel() override = default;
 
   // QAbstractItemModel overrides.
-  QVariant data(QModelIndex const& index, int role) const override;
-  Qt::ItemFlags flags(QModelIndex const& index) const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  QModelIndex index(int row, int column,
-                    QModelIndex const& parent = QModelIndex()) const override;
-  QModelIndex parent(QModelIndex const& index) const override;
-  int rowCount(QModelIndex const& parent = QModelIndex()) const override;
-  int columnCount(QModelIndex const& parent = QModelIndex()) const override;
+  [[nodiscard]] QVariant data(QModelIndex const& index,
+                              int role) const override;
+  [[nodiscard]] Qt::ItemFlags flags(QModelIndex const& index) const override;
+  [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation,
+                                    int role = Qt::DisplayRole) const override;
+  [[nodiscard]] QModelIndex index(
+      int row, int column,
+      QModelIndex const& parent = QModelIndex()) const override;
+  [[nodiscard]] QModelIndex parent(QModelIndex const& index) const override;
+  [[nodiscard]] int rowCount(
+      QModelIndex const& parent = QModelIndex()) const override;
+  [[nodiscard]] int columnCount(
+      QModelIndex const& parent = QModelIndex()) const override;
   // End QAbstractItemModel overrides.
 
-  void SetAtoms(
-      std::vector<std::unique_ptr<AtomOrDescriptorBase>>&& top_level_atoms);
+  void SetAtoms(std::unique_ptr<AtomHolder>&& atom_holder);
 
  private:
   // Update the model item based on the current state of the atoms.
   void UpdateModelItems();
 
-  //   void setupModelData(QStringList const &lines, TreeItem *parent);
-  std::vector<std::unique_ptr<AtomOrDescriptorBase>> top_level_atoms_;
+  std::unique_ptr<AtomHolder> atom_holder_;
 
   // We store model items instead of directly deriving the data from the atoms.
   // This simplifies handling the different data types involved, i.e. we can

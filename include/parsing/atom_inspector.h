@@ -43,7 +43,7 @@ class AtomInspector : public AP4_AtomInspector {
   // The atom or descriptor currently being inspected. Things like new fields
   // will be added to this.
   AtomOrDescriptorBase* current_atom_or_descriptor_ = nullptr;
-  // The insepctor stores parsed atoms in a tree, these are the atoms at the
+  // The inspector stores parsed atoms in a tree, these are the atoms at the
   // root of the tree.
   std::vector<std::unique_ptr<AtomOrDescriptorBase>> top_level_atoms_;
 };

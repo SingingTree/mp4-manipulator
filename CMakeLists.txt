@@ -68,15 +68,17 @@ set(MP4_MANIPULATOR_SOURCES
   include/gui/atom_tree_model.h
   include/gui/atom_tree_view.h
   include/gui/main_window.h
-  include/parsing/atom_inspector.h
   include/parsing/atom.h
+  include/parsing/atom_holder.h
+  include/parsing/atom_inspector.h
   include/parsing/file_utils.h
   include/parsing/position_aware_atom_factory.h
   source/gui/atom_tree_model.cpp
   source/gui/atom_tree_view.cpp
   source/gui/main_window.cpp
-  source/parsing/atom_inspector.cpp
   source/parsing/atom.cpp
+  source/parsing/atom_holder.cpp
+  source/parsing/atom_inspector.cpp
   source/parsing/file_utils.cpp
   source/parsing/position_aware_atom_factory.cpp
   source/main.cpp)

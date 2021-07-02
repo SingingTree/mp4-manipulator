@@ -6,15 +6,11 @@
 #include "parsing/file_utils.h"
 
 namespace mp4_manipulator {
-AtomTreeView::AtomTreeView(
-    std::vector<std::unique_ptr<AtomOrDescriptorBase>>&&
-        top_level_inspected_atoms,
-    std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms)
+AtomTreeView::AtomTreeView(std::unique_ptr<AtomHolder>&& atom_holder)
     : atom_tree_model_{new AtomTreeModel{this}},
       collapse_tree_action_{new QAction{"&Collapse all", this}},
       expand_tree_action_{new QAction{"&Expand all", this}} {
-  atom_tree_model_->SetAtoms(std::move(top_level_inspected_atoms));
-  top_level_ap4_atoms_ = std::move(top_level_ap4_atoms);
+  atom_tree_model_->SetAtoms(std::move(atom_holder));
 
   // Avoid warnings/footguns for virtual call in ctor, don't call on `this`,
   // explicitly use the QTreeView func.
@@ -42,7 +38,7 @@ AtomTreeView::AtomTreeView(
 void AtomTreeView::ShowContextMenu(QPoint const& point) {
   QModelIndex const index = indexAt(point);
 
-  if (top_level_ap4_atoms_.empty()) {
+  if (atom_tree_model_->rowCount() <= 0) {
     // Don't show the menu if we haven't got any atoms loaded.
     return;
   }
