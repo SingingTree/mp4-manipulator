@@ -177,16 +177,36 @@ void AtomTreeModel::SetAtoms(std::unique_ptr<AtomHolder>&& atom_holder) {
   endResetModel();
 }
 
+bool AtomTreeModel::RemoveAtom(Atom* atom) {
+  // TODO(bryce): We can be smarter than a total model reset.
+  beginResetModel();
+
+  bool was_removed = atom_holder_->RemoveAtom(atom);
+  UpdateModelItems();
+
+  // Notify that the reset has been completed, it's now safe to query the new
+  // model data.
+  endResetModel();
+  return was_removed;
+}
+
+void AtomTreeModel::SaveAtoms(QString const& file_name) {
+  QByteArray file_name_bytes = file_name.toLocal8Bit();
+  char const* c_str_file_name = file_name_bytes.data();
+
+  atom_holder_->SaveAtoms(c_str_file_name);
+}
+
 void AtomTreeModel::UpdateModelItems() {
   // Helper function that takes a ModelItem parent and a AtomOrDescriptorBase
   // and recursively constructs and adds to the parent the appropriate model
   // TODO(bryce): this would be more readable as a non-lambda in an anonymous
   // namespace
-  std::function<void(ModelItem*, AtomOrDescriptorBase const*)>
+  std::function<void(ModelItem*, AtomOrDescriptorBase*)>
       add_atom_or_descriptor =
           [&add_atom_or_descriptor](
               ModelItem* parent,
-              AtomOrDescriptorBase const* atom_or_descriptor) -> void {
+              AtomOrDescriptorBase* atom_or_descriptor) -> void {
     std::unique_ptr<ModelItem> current_item = std::make_unique<ModelItem>();
     current_item->underlying_item = atom_or_descriptor;
     current_item->type =

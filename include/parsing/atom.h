@@ -55,6 +55,10 @@ class AtomOrDescriptorBase {
   [[nodiscard]] std::vector<std::unique_ptr<AtomOrDescriptorBase>> const&
   GetChildAtoms() const;
   void AddChildAtom(std::unique_ptr<AtomOrDescriptorBase>&& child);
+  // Removes and returns the child atom at `index`. This does not update the
+  // associated ap4 atom tree, so callers should detach the associated ap4 atom
+  // if needed.
+  std::unique_ptr<AtomOrDescriptorBase>&& RemoveChildAtom(size_t index);
 
   [[nodiscard]] std::vector<std::unique_ptr<AtomOrDescriptorBase>> const&
   GetChildDescriptors() const;

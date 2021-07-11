@@ -1,5 +1,7 @@
 #include "parsing/atom_holder.h"
 
+#include "parsing/file_utils.h"
+
 namespace mp4_manipulator {
 
 AtomHolder::AtomHolder(
@@ -13,6 +15,84 @@ AtomHolder::AtomHolder(
 std::vector<std::unique_ptr<AtomOrDescriptorBase>>&
 AtomHolder::GetTopLevelAtoms() {
   return top_level_atoms_;
+}
+
+namespace {
+bool RecursiveRemoveAtom(Atom* atom_to_remove,
+                         AtomOrDescriptorBase* current_atom) {
+  for (size_t i = 0; i < current_atom->GetChildAtoms().size(); ++i) {
+    AtomOrDescriptorBase* current_child_atom =
+        current_atom->GetChildAtoms().at(i).get();
+    if (current_child_atom == atom_to_remove) {
+      current_child_atom->GetAp4Atom()->Detach();
+      delete current_child_atom->GetAp4Atom();
+      current_child_atom->SetAp4Atom(nullptr);
+      current_atom->RemoveChildAtom(i);
+      return true;
+    }
+  }
+  return false;
+}
+}  // namespace
+
+bool AtomHolder::RemoveAtom(Atom* atom_to_remove) {
+  bool found_atom = false;
+  for (size_t i = 0; i < top_level_atoms_.size(); ++i) {
+    AtomOrDescriptorBase* current_atom = top_level_atoms_.at(i).get();
+    if (current_atom == atom_to_remove) {
+      // Handle special top level case.
+      AP4_Atom* ap4_atom_to_remove = current_atom->GetAp4Atom();
+      for (size_t j = 0; j < top_level_ap4_atoms_.size(); ++j) {
+        AP4_Atom* current_ap4_atom = top_level_ap4_atoms_.at(j).get();
+        if (current_ap4_atom == ap4_atom_to_remove) {
+          assert(i == j);
+          // In future we may want to hold these atoms in a redo queue to allow
+          // for undo/redos. For now, just erase it.
+          top_level_atoms_.erase(top_level_atoms_.begin() + i);
+          top_level_ap4_atoms_.erase(top_level_ap4_atoms_.begin() + j);
+          found_atom = true;
+          break;
+        }
+      }
+      break;
+    }
+    RecursiveRemoveAtom(atom_to_remove, current_atom);
+  }
+
+  if (found_atom) {
+    // If we found and removed an atom, reprocess the model.
+    ProcessAp4Atoms();
+  }
+  return found_atom;
+}
+
+bool AtomHolder::SaveAtoms(char const* file_name) {
+  // Create AP4 byte stream from top level atoms.
+  AP4_AtomParent dummy_root;
+
+  AP4_ByteStream* output_stream = NULL;
+  AP4_Result result = AP4_FileByteStream::Create(
+      file_name, AP4_FileByteStream::STREAM_MODE_WRITE, output_stream);
+
+  if (AP4_FAILED(result)) {
+    // TODO(bryce): error handling.
+    fprintf(stderr, "ERROR: cannot open output file (%s)\n", file_name);
+    return false;
+  }
+
+  for (std::unique_ptr<AP4_Atom>& ap4_atom : top_level_ap4_atoms_) {
+    dummy_root.AddChild(ap4_atom.get());
+  }
+
+  dummy_root.GetChildren().Apply(AP4_AtomListWriter(*output_stream));
+
+  result = dummy_root.GetChildren().Clear();
+  assert(AP4_SUCCEEDED(result));
+  assert(dummy_root.GetChildren().ItemCount() == 0);
+
+  output_stream->Release();
+
+  return true;
 }
 
 namespace {
@@ -68,6 +148,61 @@ void AtomHolder::MatchAtoms() {
     RecursiveMatchAtoms(top_level_atoms_.at(i).get(),
                         top_level_ap4_atoms_.at(i).get());
   }
+}
+
+bool AtomHolder::ProcessAp4Atoms() {
+  // TODO(bryce): better estimate the size of this.
+  AP4_MemoryByteStream* current_atom_input_stream =
+      new AP4_MemoryByteStream{AP4_Size{}};
+  AP4_MemoryByteStream* current_atom_output_stream =
+      new AP4_MemoryByteStream{AP4_Size{}};
+
+  // Create AP4 byte stream from top level atoms.
+  AP4_AtomParent dummy_root;
+
+  for (std::unique_ptr<AP4_Atom>& ap4_atom : top_level_ap4_atoms_) {
+    dummy_root.AddChild(ap4_atom.get());
+  }
+  dummy_root.GetChildren().Apply(
+      AP4_AtomListWriter(*current_atom_input_stream));
+
+  // Seek the input stream to the start so it's ready to be read.
+  current_atom_input_stream->Seek(0);
+
+  // Create processor.
+  AP4_Processor processor;
+
+  // Write atoms to an AP4_MemoryByteStream with the processor (AP4_AtomParent).
+  processor.Process(*current_atom_input_stream, *current_atom_output_stream);
+
+  // Seek the output stream to the start so it's ready to be parsed.
+  current_atom_output_stream->Seek(0);
+
+  // Parse the atoms with mp4 manipulator.
+  std::optional<std::unique_ptr<AtomHolder>> possible_new_holder =
+      utility::ReadAtoms(current_atom_output_stream);
+  if (!possible_new_holder.has_value()) {
+    return false;
+  }
+
+  std::unique_ptr<AtomHolder> new_atom_holder{
+      std::move(possible_new_holder.value())};
+
+  // Remove the atoms from our dummy root, otherwise it will delete them when
+  // it goes out of scope and we'll double free. We'll let top_level_ap4_atoms_
+  // take care of deleting them.
+  [[maybe_unused]] AP4_Result result = dummy_root.GetChildren().Clear();
+  assert(AP4_SUCCEEDED(result));
+  assert(dummy_root.GetChildren().ItemCount() == 0);
+
+  // Move the atoms out of the new holder into this holder.
+  this->top_level_atoms_ = std::move(new_atom_holder->top_level_atoms_);
+  this->top_level_ap4_atoms_ = std::move(new_atom_holder->top_level_ap4_atoms_);
+
+  current_atom_input_stream->Release();
+  current_atom_output_stream->Release();
+
+  return true;
 }
 
 }  // namespace mp4_manipulator

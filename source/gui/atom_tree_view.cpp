@@ -58,6 +58,8 @@ void AtomTreeView::ShowContextMenu(QPoint const& point) {
     // These are created on demand so they can reference the appropriate atoms.
     ModelItem* item = static_cast<ModelItem*>(index.internalPointer());
 
+    AtomOrDescriptorBase* atom_or_descriptor = item->underlying_item;
+
     AP4_Atom* ap4_atom = item->underlying_item != nullptr
                              ? item->underlying_item->GetAp4Atom()
                              : nullptr;
@@ -74,6 +76,20 @@ void AtomTreeView::ShowContextMenu(QPoint const& point) {
       assert(ok);
       menu.addAction(dump_action);
     }
+
+    if (atom_or_descriptor != nullptr &&
+        atom_or_descriptor->GetType() == AtomOrDescriptorBase::Type::kAtom) {
+      Atom* atom = static_cast<Atom*>(atom_or_descriptor);
+      QAction* remove_action = new QAction("&Remove atom", &menu);
+      // These need to be on the same thread so the connection below will use
+      // a direct connection, otherwise this isn't thread safe.
+      assert(remove_action->thread() == this->thread());
+
+      [[maybe_unused]] bool ok = connect(remove_action, &QAction::triggered,
+                                         [this, atom]() { RemoveAtom(atom); });
+      assert(ok);
+      menu.addAction(remove_action);
+    }
   }
 
   menu.exec(mapToGlobal(point));
@@ -85,6 +101,16 @@ void AtomTreeView::DumpAtom(AP4_Atom& atom) {
   char const* c_str_file_name = file_name_bytes.data();
 
   utility::DumpAtom(c_str_file_name, atom);
+}
+
+void AtomTreeView::SaveAtoms() {
+  QString const file_name = QFileDialog::getSaveFileName(this);
+
+  atom_tree_model_->SaveAtoms(file_name);
+}
+
+bool AtomTreeView::RemoveAtom(Atom* atom) {
+  return atom_tree_model_->RemoveAtom(atom);
 }
 
 }  // namespace mp4_manipulator

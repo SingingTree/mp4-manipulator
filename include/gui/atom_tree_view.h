@@ -14,6 +14,9 @@ class AtomTreeView : public QTreeView {
  public:
   AtomTreeView(std::unique_ptr<AtomHolder>&& atom_holder);
 
+  // Shows a file dialog and then saves (dumps all) atoms to the file.
+  void SaveAtoms();
+
  private:
   AtomTreeModel* atom_tree_model_;
 
@@ -27,8 +30,18 @@ class AtomTreeView : public QTreeView {
   // functionality to manipulate the tree and its contents.
   void ShowContextMenu(QPoint const& point);
 
-  // Shows a file dialog and then dumps the passed atom to that file.
+  // Shows a file dialog and then dumps the passed atom to the file.
   void DumpAtom(AP4_Atom& atom);
+
+  // Start processing methods.
+  // These methods result in an AP4 processor running, meaning the atom tree
+  // is reprocessed. Tries to ensure the atoms are well formed (no bad sizes,
+  // offsets, etc.), but can be costly.
+  bool RemoveAtom(Atom* atom);
+
+  // TODO(bryce) ReplaceAtom
+  // TODO(bryce) InsertAtom(figure out how to handle location)
+  // End processing methods.
 };
 }  // namespace mp4_manipulator
 

@@ -37,11 +37,14 @@ class MainWindow : public QMainWindow {
 
   // Begin QActions for menu bar.
   QAction* open_file_action_;
+  QAction* save_file_action_;
   // End QActions for menu bar.
 
  private slots:
   // Open a file in the UI.
   void OpenFileUsingDialog();
+  // Requests the current AtomTreeView saves its atoms.
+  void SaveFile();
 };
 
 }  // namespace mp4_manipulator

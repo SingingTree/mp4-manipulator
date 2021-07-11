@@ -29,7 +29,7 @@ struct ModelItem {
   ModelItem* parent{nullptr};
   std::vector<std::unique_ptr<ModelItem>> children;
 
-  AtomOrDescriptorBase const* underlying_item = nullptr;
+  AtomOrDescriptorBase* underlying_item = nullptr;
 };
 
 class AtomTreeModel : public QAbstractItemModel {
@@ -54,6 +54,10 @@ class AtomTreeModel : public QAbstractItemModel {
   // End QAbstractItemModel overrides.
 
   void SetAtoms(std::unique_ptr<AtomHolder>&& atom_holder);
+
+  bool RemoveAtom(Atom* atom);
+
+  void SaveAtoms(QString const& file_name);
 
  private:
   // Update the model item based on the current state of the atoms.

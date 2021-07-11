@@ -51,6 +51,13 @@ void AtomOrDescriptorBase::AddChildAtom(
   child_atoms_.push_back(std::move(child));
 }
 
+std::unique_ptr<AtomOrDescriptorBase>&& AtomOrDescriptorBase::RemoveChildAtom(
+    size_t index) {
+  auto atom = std::move(child_atoms_.at(index));
+  child_atoms_.erase(child_atoms_.begin() + index);
+  return std::move(atom);
+}
+
 std::vector<std::unique_ptr<AtomOrDescriptorBase>> const&
 AtomOrDescriptorBase::GetChildDescriptors() const {
   return child_descriptors_;
