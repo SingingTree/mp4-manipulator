@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.0)
 
 project(mp4-manipulator VERSION 0.0.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Start Qt6 config
@@ -73,6 +73,7 @@ set(MP4_MANIPULATOR_SOURCES
   include/parsing/atom_inspector.h
   include/parsing/file_utils.h
   include/parsing/position_aware_atom_factory.h
+  include/result.h
   source/gui/atom_tree_model.cpp
   source/gui/atom_tree_view.cpp
   source/gui/main_window.cpp
