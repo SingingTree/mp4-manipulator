@@ -177,24 +177,25 @@ void AtomTreeModel::SetAtoms(std::unique_ptr<AtomHolder>&& atom_holder) {
   endResetModel();
 }
 
-bool AtomTreeModel::RemoveAtom(Atom* atom) {
+Result<std::monostate, std::string> AtomTreeModel::RemoveAtom(Atom* atom) {
   // TODO(bryce): We can be smarter than a total model reset.
   beginResetModel();
 
-  bool was_removed = atom_holder_->RemoveAtom(atom);
+  Result<std::monostate, std::string> result =
+      atom_holder_->RemoveAtom(atom);
   UpdateModelItems();
 
   // Notify that the reset has been completed, it's now safe to query the new
   // model data.
   endResetModel();
-  return was_removed;
+  return result;
 }
 
-void AtomTreeModel::SaveAtoms(QString const& file_name) {
+Result<std::monostate, std::string> AtomTreeModel::SaveAtoms(QString const& file_name) {
   QByteArray file_name_bytes = file_name.toLocal8Bit();
   char const* c_str_file_name = file_name_bytes.data();
 
-  atom_holder_->SaveAtoms(c_str_file_name);
+  return atom_holder_->SaveAtoms(c_str_file_name);
 }
 
 void AtomTreeModel::UpdateModelItems() {

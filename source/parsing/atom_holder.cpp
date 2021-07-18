@@ -35,7 +35,8 @@ bool RecursiveRemoveAtom(Atom* atom_to_remove,
 }
 }  // namespace
 
-bool AtomHolder::RemoveAtom(Atom* atom_to_remove) {
+Result<std::monostate, std::string> AtomHolder::RemoveAtom(
+    Atom* atom_to_remove) {
   bool found_atom = false;
   for (size_t i = 0; i < top_level_atoms_.size(); ++i) {
     AtomOrDescriptorBase* current_atom = top_level_atoms_.at(i).get();
@@ -62,11 +63,13 @@ bool AtomHolder::RemoveAtom(Atom* atom_to_remove) {
   if (found_atom) {
     // If we found and removed an atom, reprocess the model.
     ProcessAp4Atoms();
+    return Result<std::monostate, std::string>::Ok();
   }
-  return found_atom;
+  return Result<std::monostate, std::string>::Err("RemoveAtom failed, could not find atom.");
 }
 
-bool AtomHolder::SaveAtoms(char const* file_name) {
+Result<std::monostate, std::string> AtomHolder::SaveAtoms(
+    char const* file_name) {
   // Create AP4 byte stream from top level atoms.
   AP4_AtomParent dummy_root;
 
@@ -75,9 +78,8 @@ bool AtomHolder::SaveAtoms(char const* file_name) {
       file_name, AP4_FileByteStream::STREAM_MODE_WRITE, output_stream);
 
   if (AP4_FAILED(result)) {
-    // TODO(bryce): error handling.
-    fprintf(stderr, "ERROR: cannot open output file (%s)\n", file_name);
-    return false;
+    // TODO(bryce): better error message (could us fmt).
+    return Result<std::monostate, std::string>::Err("AP4_FileByteStream::Create failed during SaveAtoms");
   }
 
   for (std::unique_ptr<AP4_Atom>& ap4_atom : top_level_ap4_atoms_) {
@@ -92,7 +94,7 @@ bool AtomHolder::SaveAtoms(char const* file_name) {
 
   output_stream->Release();
 
-  return true;
+  return Result<std::monostate, std::string>::Ok();
 }
 
 namespace {

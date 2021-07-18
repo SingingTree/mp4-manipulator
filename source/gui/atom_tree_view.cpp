@@ -2,8 +2,10 @@
 
 #include <QFileDialog>
 #include <QMenu>
+#include <QMessageBox>
 
 #include "parsing/file_utils.h"
+
 
 namespace mp4_manipulator {
 AtomTreeView::AtomTreeView(std::unique_ptr<AtomHolder>&& atom_holder)
@@ -85,8 +87,12 @@ void AtomTreeView::ShowContextMenu(QPoint const& point) {
       // a direct connection, otherwise this isn't thread safe.
       assert(remove_action->thread() == this->thread());
 
-      [[maybe_unused]] bool ok = connect(remove_action, &QAction::triggered,
-                                         [this, atom]() { RemoveAtom(atom); });
+      auto remove_lambda = [this, atom]() {
+        // TODO(bryce): check the returned result. This shouldn't fail,
+        // but will assert if it does so this should be handled.
+        RemoveAtom(atom);
+      };
+      [[maybe_unused]] bool ok = connect(remove_action, &QAction::triggered, remove_lambda);
       assert(ok);
       menu.addAction(remove_action);
     }
@@ -106,10 +112,18 @@ void AtomTreeView::DumpAtom(AP4_Atom& atom) {
 void AtomTreeView::SaveAtoms() {
   QString const file_name = QFileDialog::getSaveFileName(this);
 
-  atom_tree_model_->SaveAtoms(file_name);
+  Result<std::monostate, std::string> result = atom_tree_model_->SaveAtoms(file_name);
+  if (result.IsErr()) {
+    result.MarkErrorHandled();
+
+    QMessageBox message_box;
+    message_box.setText("Saving atoms failed.");
+    message_box.setDetailedText(QString::fromStdString(result.GetErr()));
+    message_box.exec();
+  }
 }
 
-bool AtomTreeView::RemoveAtom(Atom* atom) {
+Result<std::monostate, std::string> AtomTreeView::RemoveAtom(Atom* atom) {
   return atom_tree_model_->RemoveAtom(atom);
 }
 

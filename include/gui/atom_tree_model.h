@@ -5,6 +5,7 @@
 
 #include "parsing/atom.h"
 #include "parsing/atom_holder.h"
+#include "result.h"
 
 namespace mp4_manipulator {
 
@@ -55,9 +56,9 @@ class AtomTreeModel : public QAbstractItemModel {
 
   void SetAtoms(std::unique_ptr<AtomHolder>&& atom_holder);
 
-  bool RemoveAtom(Atom* atom);
+  Result<std::monostate, std::string> RemoveAtom(Atom* atom);
 
-  void SaveAtoms(QString const& file_name);
+  Result<std::monostate, std::string> SaveAtoms(QString const& file_name);
 
  private:
   // Update the model item based on the current state of the atoms.

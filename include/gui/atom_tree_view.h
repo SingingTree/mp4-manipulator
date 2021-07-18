@@ -37,7 +37,7 @@ class AtomTreeView : public QTreeView {
   // These methods result in an AP4 processor running, meaning the atom tree
   // is reprocessed. Tries to ensure the atoms are well formed (no bad sizes,
   // offsets, etc.), but can be costly.
-  bool RemoveAtom(Atom* atom);
+  Result<std::monostate, std::string> RemoveAtom(Atom* atom);
 
   // TODO(bryce) ReplaceAtom
   // TODO(bryce) InsertAtom(figure out how to handle location)
