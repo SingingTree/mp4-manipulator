@@ -88,16 +88,19 @@ std::optional<std::unique_ptr<AtomHolder>> ReadAtoms(char const* file_name) {
   // file->Inspect(*inspector);
 
   AP4_ByteStream* input = NULL;
-  AP4_Result result = AP4_FileByteStream::Create(
+  AP4_Result ap4_result = AP4_FileByteStream::Create(
       file_name, AP4_FileByteStream::STREAM_MODE_READ, input);
-  if (AP4_FAILED(result)) {
+  if (AP4_FAILED(ap4_result)) {
     // TODO(bryce): Tie this into some global error handler.
     fprintf(stderr, "ERROR: cannot open input file %s (%d)\n", file_name,
-            result);
+            ap4_result);
     return std::nullopt;
   }
 
-  return ReadAtoms(input);
+  // TODO(bryce): error handle this with a Result.
+  std::optional<std::unique_ptr<AtomHolder>> holder = ReadAtoms(input);
+  input->Release();
+  return holder;
 }
 
 void DumpAtom(char const* output_file_name, AP4_Atom& atom) {
