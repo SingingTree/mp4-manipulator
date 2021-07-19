@@ -14,9 +14,7 @@
 template <typename V, typename E>
 class Result {
  public:
-  static Result Ok() {
-    return Result{std::in_place_index<0>};
-  }
+  static Result Ok() { return Result{std::in_place_index<0>}; }
 
   static Result Ok(V ok_value) {
     return Result{std::in_place_index<0>, std::move(ok_value)};
@@ -89,10 +87,7 @@ class Result {
   }
 
  private:
-  Result(std::in_place_index_t<0> index)
-      : result_(index) {
-    assert(IsOk());
-  }
+  Result(std::in_place_index_t<0> index) : result_(index) { assert(IsOk()); }
 
   Result(std::in_place_index_t<0> index, V ok_value)
       : result_(index, std::move(ok_value)) {
@@ -109,7 +104,7 @@ class Result {
   bool is_error_handled_ = false;
   std::variant<V, E> result_;
   // Clang doesn't have source_location support yet. Add this in once it does.
-  //std::optional<std::source_location> error_location;
+  // std::optional<std::source_location> error_location;
 };
 
 #endif  //  MP4_MANIPULATOR_ERROR_H_

@@ -16,8 +16,8 @@ class AtomHolder {
       std::vector<std::unique_ptr<AP4_Atom>>&& top_level_ap4_atoms);
   std::vector<std::unique_ptr<AtomOrDescriptorBase>>& GetTopLevelAtoms();
 
-  // Searches the model for `atom_to_remove` and removes it.Returns a result, on failure
-  // this result has a string explaining the error.
+  // Searches the model for `atom_to_remove` and removes it.Returns a result, on
+  // failure this result has a string explaining the error.
   Result<std::monostate, std::string> RemoveAtom(Atom* atom_to_remove);
 
   // Saves the atoms in the model to a file. Returns a result, on failure

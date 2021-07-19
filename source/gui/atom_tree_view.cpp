@@ -6,7 +6,6 @@
 
 #include "parsing/file_utils.h"
 
-
 namespace mp4_manipulator {
 AtomTreeView::AtomTreeView(std::unique_ptr<AtomHolder>&& atom_holder)
     : atom_tree_model_{new AtomTreeModel{this}},
@@ -92,7 +91,8 @@ void AtomTreeView::ShowContextMenu(QPoint const& point) {
         // but will assert if it does so this should be handled.
         RemoveAtom(atom);
       };
-      [[maybe_unused]] bool ok = connect(remove_action, &QAction::triggered, remove_lambda);
+      [[maybe_unused]] bool ok =
+          connect(remove_action, &QAction::triggered, remove_lambda);
       assert(ok);
       menu.addAction(remove_action);
     }
@@ -112,7 +112,8 @@ void AtomTreeView::DumpAtom(AP4_Atom& atom) {
 void AtomTreeView::SaveAtoms() {
   QString const file_name = QFileDialog::getSaveFileName(this);
 
-  Result<std::monostate, std::string> result = atom_tree_model_->SaveAtoms(file_name);
+  Result<std::monostate, std::string> result =
+      atom_tree_model_->SaveAtoms(file_name);
   if (result.IsErr()) {
     result.MarkErrorHandled();
 

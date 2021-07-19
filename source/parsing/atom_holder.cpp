@@ -65,7 +65,8 @@ Result<std::monostate, std::string> AtomHolder::RemoveAtom(
     ProcessAp4Atoms();
     return Result<std::monostate, std::string>::Ok();
   }
-  return Result<std::monostate, std::string>::Err("RemoveAtom failed, could not find atom.");
+  return Result<std::monostate, std::string>::Err(
+      "RemoveAtom failed, could not find atom.");
 }
 
 Result<std::monostate, std::string> AtomHolder::SaveAtoms(
@@ -79,7 +80,8 @@ Result<std::monostate, std::string> AtomHolder::SaveAtoms(
 
   if (AP4_FAILED(result)) {
     // TODO(bryce): better error message (could us fmt).
-    return Result<std::monostate, std::string>::Err("AP4_FileByteStream::Create failed during SaveAtoms");
+    return Result<std::monostate, std::string>::Err(
+        "AP4_FileByteStream::Create failed during SaveAtoms");
   }
 
   for (std::unique_ptr<AP4_Atom>& ap4_atom : top_level_ap4_atoms_) {
