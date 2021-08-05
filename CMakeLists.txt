@@ -71,6 +71,7 @@ set(MP4_MANIPULATOR_SOURCES
   include/parsing/atom.h
   include/parsing/atom_holder.h
   include/parsing/atom_inspector.h
+  include/parsing/atom_path_utils.h
   include/parsing/file_utils.h
   include/parsing/position_aware_atom_factory.h
   include/result.h
@@ -80,6 +81,7 @@ set(MP4_MANIPULATOR_SOURCES
   source/parsing/atom.cpp
   source/parsing/atom_holder.cpp
   source/parsing/atom_inspector.cpp
+  source/parsing/atom_path_utils.cpp
   source/parsing/file_utils.cpp
   source/parsing/position_aware_atom_factory.cpp
   source/main.cpp)

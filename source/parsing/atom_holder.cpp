@@ -1,8 +1,98 @@
 #include "parsing/atom_holder.h"
 
+#include "parsing/atom_path_utils.h"
 #include "parsing/file_utils.h"
 
 namespace mp4_manipulator {
+namespace {
+// Base class for commands for the processor.
+class Command {
+ public:
+  virtual Result<std::monostate, std::string> Do(AP4_AtomParent& top_level) = 0;
+  Command() = default;
+  Command(Command const&) = default;
+  Command& operator=(Command const&) = default;
+  Command(Command&&) = default;
+  Command& operator=(Command&&) = default;
+  virtual ~Command() = default;
+};
+
+class RemoveCommand : public Command {
+ public:
+  RemoveCommand(Ap4CompatiblePath path_to_remove)
+      : path_to_remove_(std::move(path_to_remove)) {}
+  Result<std::monostate, std::string> Do(AP4_AtomParent& top_level) override {
+    std::optional<AP4_Atom*> possible_atom =
+        GetAp4AtomFromPath(path_to_remove_, top_level);
+    if (!possible_atom.has_value()) {
+      return Result<std::monostate, std::string>::Err("Atom not found!");
+    }
+    AP4_Atom* atom = possible_atom.value();
+    atom->Detach();
+
+    return Result<std::monostate, std::string>::Ok();
+  }
+
+ private:
+  Ap4CompatiblePath path_to_remove_;
+};
+
+// Based on AP4_EditingProcessor from Mp4Edit.cpp in the Ap4 lib.
+class EditingProcessor : public AP4_Processor {
+ public:
+  EditingProcessor() = default;
+  EditingProcessor(EditingProcessor const&) = delete;
+  EditingProcessor& operator=(EditingProcessor const&) = delete;
+  EditingProcessor(EditingProcessor&& other) noexcept
+      : commands_(std::move(other.commands_)) {}
+  EditingProcessor& operator=(EditingProcessor&& other) noexcept {
+    if (this == &other) {
+      return *this;
+    }
+    this->commands_ = std::move(other.commands_);
+    return *this;
+  }
+  // EditingProcessor(EditingProcessor&& other) = default;
+  ~EditingProcessor() override = default;
+
+  AP4_Result Initialize(AP4_AtomParent& top_level, AP4_ByteStream& stream,
+                        ProgressListener* listener) override;
+  void AddCommand(std::unique_ptr<Command> command);
+
+  std::optional<std::string> GetInitializationError() const;
+
+ private:
+  std::vector<std::unique_ptr<Command>> commands_;
+
+  // If `Initialize()` failed, this will contain the error.
+  std::optional<std::string> initialization_error_;
+};
+
+AP4_Result EditingProcessor::Initialize(AP4_AtomParent& top_level,
+                                        AP4_ByteStream& stream,
+                                        ProgressListener* listener) {
+  AP4_Result ap4_result = AP4_SUCCESS;
+  for (std::unique_ptr<Command>& command : commands_) {
+    // TODO(bryce): logging on failure.
+    Result<std::monostate, std::string> result = command->Do(top_level);
+    if (result.IsErr()) {
+      result.MarkErrorHandled();
+      initialization_error_ = std::move(result).GetErr();
+      ap4_result = AP4_FAILURE;
+    }
+  }
+  return ap4_result;
+}
+
+void EditingProcessor::AddCommand(std::unique_ptr<Command> command) {
+  commands_.push_back(std::move(command));
+}
+
+// TODO(bryce): use this to do error reporting to the UI.
+std::optional<std::string> EditingProcessor::GetInitializationError() const {
+  return initialization_error_;
+}
+}  // namespace
 
 AtomHolder::AtomHolder(
     std::vector<std::unique_ptr<AtomOrDescriptorBase>>&& top_level_atoms,
@@ -17,56 +107,23 @@ AtomHolder::GetTopLevelAtoms() {
   return top_level_atoms_;
 }
 
-namespace {
-bool RecursiveRemoveAtom(Atom* atom_to_remove,
-                         AtomOrDescriptorBase* current_atom) {
-  for (size_t i = 0; i < current_atom->GetChildAtoms().size(); ++i) {
-    AtomOrDescriptorBase* current_child_atom =
-        current_atom->GetChildAtoms().at(i).get();
-    if (current_child_atom == atom_to_remove) {
-      current_child_atom->GetAp4Atom()->Detach();
-      delete current_child_atom->GetAp4Atom();
-      current_child_atom->SetAp4Atom(nullptr);
-      current_atom->RemoveChildAtom(i);
-      return true;
-    }
-  }
-  return false;
-}
-}  // namespace
-
 Result<std::monostate, std::string> AtomHolder::RemoveAtom(
     Atom* atom_to_remove) {
-  bool found_atom = false;
-  for (size_t i = 0; i < top_level_atoms_.size(); ++i) {
-    AtomOrDescriptorBase* current_atom = top_level_atoms_.at(i).get();
-    if (current_atom == atom_to_remove) {
-      // Handle special top level case.
-      AP4_Atom* ap4_atom_to_remove = current_atom->GetAp4Atom();
-      for (size_t j = 0; j < top_level_ap4_atoms_.size(); ++j) {
-        AP4_Atom* current_ap4_atom = top_level_ap4_atoms_.at(j).get();
-        if (current_ap4_atom == ap4_atom_to_remove) {
-          assert(i == j);
-          // In future we may want to hold these atoms in a redo queue to allow
-          // for undo/redos. For now, just erase it.
-          top_level_atoms_.erase(top_level_atoms_.begin() + i);
-          top_level_ap4_atoms_.erase(top_level_ap4_atoms_.begin() + j);
-          found_atom = true;
-          break;
-        }
-      }
-      break;
-    }
-    RecursiveRemoveAtom(atom_to_remove, current_atom);
+  AP4_List<AP4_Atom> top_level;
+  for (std::unique_ptr<AP4_Atom>& ap4_atom : top_level_ap4_atoms_) {
+    top_level.Add(ap4_atom.get());
   }
 
-  if (found_atom) {
-    // If we found and removed an atom, reprocess the model.
-    ProcessAp4Atoms();
-    return Result<std::monostate, std::string>::Ok();
-  }
-  return Result<std::monostate, std::string>::Err(
-      "RemoveAtom failed, could not find atom.");
+  Ap4CompatiblePath path = GetAp4Path(atom_to_remove->GetAp4Atom(), top_level);
+
+  EditingProcessor processor;
+  // TODO(bryce): error handle this.
+  processor.AddCommand(std::make_unique<RemoveCommand>(path));
+
+  // TODO(bryce): error handle this.
+  ProcessAp4Atoms(processor);
+
+  return Result<std::monostate, std::string>::Ok();
 }
 
 Result<std::monostate, std::string> AtomHolder::SaveAtoms(
@@ -154,7 +211,7 @@ void AtomHolder::MatchAtoms() {
   }
 }
 
-bool AtomHolder::ProcessAp4Atoms() {
+bool AtomHolder::ProcessAp4Atoms(AP4_Processor& processor) {
   // TODO(bryce): better estimate the size of this.
   AP4_MemoryByteStream* current_atom_input_stream =
       new AP4_MemoryByteStream{AP4_Size{}};
@@ -172,9 +229,6 @@ bool AtomHolder::ProcessAp4Atoms() {
 
   // Seek the input stream to the start so it's ready to be read.
   current_atom_input_stream->Seek(0);
-
-  // Create processor.
-  AP4_Processor processor;
 
   // Write atoms to an AP4_MemoryByteStream with the processor (AP4_AtomParent).
   processor.Process(*current_atom_input_stream, *current_atom_output_stream);

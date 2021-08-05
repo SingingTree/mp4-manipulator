@@ -42,7 +42,7 @@ class AtomHolder {
   // processing, as it will regenerate the whole set of atoms.
   //
   // Returns true if processing was successful, false if not.
-  bool ProcessAp4Atoms();
+  bool ProcessAp4Atoms(AP4_Processor& processor);
 };
 
 }  // namespace mp4_manipulator
