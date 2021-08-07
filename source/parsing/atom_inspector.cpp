@@ -55,12 +55,8 @@ void AtomInspector::EndDescriptor() {
 void AtomInspector::AddField(char const* name, AP4_UI64 value,
                              FormatHint hint /* = HINT_NONE */) {
   assert(current_atom_or_descriptor_ != nullptr);
-  // Use AP4 formatting to conform to lib expectations + use hints.
-  char str[32];
-  AP4_FormatString(str, sizeof(str), hint == HINT_HEX ? "%llx" : "%lld", value);
-
   QString value_string{};
-  QTextStream(&value_string) << str;
+  QTextStream(&value_string) << value;
   current_atom_or_descriptor_->AddField(QString(name), std::move(value_string));
 }
 
