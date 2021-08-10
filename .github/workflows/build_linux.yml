@@ -28,8 +28,14 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: cmake --build . --config $BUILD_TYPE
 
+    # Work around for https://github.com/actions/upload-artifact/issues/38
+    # dropping permissions.
+    - name: tar files
+      working-directory: ${{github.workspace}}/build
+      run: tar -cvf mp4-manipulator.tar mp4-manipulator
+
     - name: Archive build
       uses: actions/upload-artifact@v2
       with:
         name: linux-${{env.BUILD_TYPE}}
-        path: ${{github.workspace}}/build/mp4-manipulator
+        path: ${{github.workspace}}/build/mp4-manipulator.tar
