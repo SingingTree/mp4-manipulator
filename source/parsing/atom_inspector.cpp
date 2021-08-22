@@ -84,9 +84,14 @@ void AtomInspector::AddField(char const* name, unsigned char const* bytes,
   assert(current_atom_or_descriptor_ != nullptr);
   QString value_string{};
   QTextStream stream(&value_string);
+  stream << "[";
   for (size_t i = 0; i < byte_count; i++) {
-    stream << bytes[i];
+    stream << QString::asprintf("%02x", bytes[i]);
+    if (i < byte_count - 1) {
+      stream << " ";
+    }
   }
+  stream << "]";
   current_atom_or_descriptor_->AddField(QString(name), std::move(value_string));
 }
 
